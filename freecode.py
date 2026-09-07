@@ -88,6 +88,17 @@ def build_linked_list(values):
     return head
 
 
+def build_linked_list_with_cycle(values, cycle_pos):
+    """Builds a linked list from `values`, then (if cycle_pos >= 0) makes the
+    tail point back to the node at index `cycle_pos` to create a cycle."""
+    nodes = [ListNode(v) for v in values]
+    for i in range(len(nodes) - 1):
+        nodes[i].next = nodes[i + 1]
+    if nodes and cycle_pos is not None and cycle_pos >= 0:
+        nodes[-1].next = nodes[cycle_pos]
+    return nodes[0] if nodes else None
+
+
 def linked_list_to_list(node):
     out = []
     seen = set()
@@ -246,7 +257,21 @@ def gen_two_sum(difficulty):
     e1 = solve(nums1, t1)
     nums2, t2 = make_case()
     e2 = solve(nums2, t2)
-    test_cases = [((nums1, t1), e1), ((nums2, t2), e2)]
+    nums3, t3 = make_case()
+    e3 = solve(nums3, t3)
+
+    # Edge cases: minimum-size array, duplicate values, negative target/numbers
+    edge_min = [3, 5]
+    edge_dup = [4, 4, 7, 2]
+    edge_neg = [-6, 2, 9, -3, 1]
+    edge_cases = [
+        ((edge_min, 8), solve(edge_min, 8)),
+        ((edge_dup, 8), solve(edge_dup, 8)),
+        ((edge_neg, -9), solve(edge_neg, -9)),
+    ]
+    test_cases = [
+        ((nums1, t1), e1), ((nums2, t2), e2), ((nums3, t3), e3),
+    ] + edge_cases
     desc = f"""Given an array of integers `nums` and an integer `target`, return the
 indices of the two numbers that add up to `target`, as a sorted list [i, j].
 You may assume exactly one valid pair exists, and you may not reuse the same
@@ -288,7 +313,21 @@ def gen_max_subarray(difficulty):
     e1 = solve(nums1)
     nums2 = make_case()
     e2 = solve(nums2)
-    test_cases = [((nums1,), e1), ((nums2,), e2)]
+    nums3 = make_case()
+    e3 = solve(nums3)
+
+    # Edge cases: single element, all negative, all identical values
+    edge_single = [random.randint(-15, 15)]
+    edge_all_negative = [-3, -7, -1, -9, -4]
+    edge_all_same = [5, 5, 5, 5, 5]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_all_negative,), solve(edge_all_negative)),
+        ((edge_all_same,), solve(edge_all_same)),
+    ]
+    test_cases = [
+        ((nums1,), e1), ((nums2,), e2), ((nums3,), e3),
+    ] + edge_cases
     desc = f"""Given an integer array `nums`, find the contiguous subarray (containing
 at least one number) with the largest sum, and return that sum.
 
@@ -309,6 +348,61 @@ Output: {e1}
     )
     return Problem("Maximum Subarray", "Arrays", difficulty, desc,
                     "max_subarray", starter, test_cases, hint=hint,
+                    solution=solution_code)
+
+
+def gen_contains_duplicate(difficulty):
+    def solve(nums):
+        return len(set(nums)) != len(nums)
+
+    def make_case():
+        n = size_for_difficulty(difficulty, (4, 6), (6, 12), (12, 20))
+        has_dup = random.random() < 0.5
+        if has_dup:
+            base = [random.randint(-20, 20) for _ in range(max(n - 1, 1))]
+            base.append(random.choice(base))
+            random.shuffle(base)
+            return base
+        pool = list(range(-40, 40))
+        random.shuffle(pool)
+        return pool[:n]
+
+    nums1 = make_case()
+    e1 = solve(nums1)
+    nums2 = make_case()
+    e2 = solve(nums2)
+    nums3 = make_case()
+    e3 = solve(nums3)
+
+    # Edge cases: single element (never a duplicate), all identical values,
+    # and all distinct values
+    edge_single = [random.randint(-20, 20)]
+    edge_all_same = [4, 4, 4, 4]
+    edge_all_distinct = [1, 2, 3, 4, 5]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_all_same,), solve(edge_all_same)),
+        ((edge_all_distinct,), solve(edge_all_distinct)),
+    ]
+    test_cases = [
+        ((nums1,), e1), ((nums2,), e2), ((nums3,), e3),
+    ] + edge_cases
+    desc = f"""Given an integer array `nums`, return True if any value appears at
+least twice in the array, and False if every element is distinct.
+
+Example:
+Input: nums = {nums1}
+Output: {e1}
+"""
+    starter = "def contains_duplicate(nums):\n    # Your code here\n    pass\n"
+    hint = ("Compare the length of the array to the length of the set of its "
+            "elements — a set automatically drops duplicates.")
+    solution_code = (
+        "def contains_duplicate(nums):\n"
+        "    return len(set(nums)) != len(nums)\n"
+    )
+    return Problem("Contains Duplicate", "Arrays", difficulty, desc,
+                    "contains_duplicate", starter, test_cases, hint=hint,
                     solution=solution_code)
 
 
@@ -339,7 +433,22 @@ def gen_valid_palindrome(difficulty):
     e1 = solve(s1)
     s2 = make_case()
     e2 = solve(s2)
-    test_cases = [((s1,), e1), ((s2,), e2)]
+    s3 = make_case()
+    e3 = solve(s3)
+
+    # Edge cases: single character, only punctuation (cleans to empty string,
+    # which is a palindrome), and a mixed-case near-palindrome that fails
+    edge_single = "q"
+    edge_punct_only = "!!! , ,,,"
+    edge_not_palindrome = "Hello, World!"
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_punct_only,), solve(edge_punct_only)),
+        ((edge_not_palindrome,), solve(edge_not_palindrome)),
+    ]
+    test_cases = [
+        ((s1,), e1), ((s2,), e2), ((s3,), e3),
+    ] + edge_cases
     desc = f"""Given a string `s`, determine whether it is a palindrome, considering
 only alphanumeric characters and ignoring case. Return True or False.
 
@@ -379,7 +488,22 @@ def gen_first_unique_char(difficulty):
     e1 = solve(s1)
     s2 = make_case()
     e2 = solve(s2)
-    test_cases = [((s1,), e1), ((s2,), e2)]
+    s3 = make_case()
+    e3 = solve(s3)
+
+    # Edge cases: single character, no unique character exists, first char
+    # itself is the unique one
+    edge_single = "z"
+    edge_no_unique = "aabbcc"
+    edge_first_unique = "xaabbcc"
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_no_unique,), solve(edge_no_unique)),
+        ((edge_first_unique,), solve(edge_first_unique)),
+    ]
+    test_cases = [
+        ((s1,), e1), ((s2,), e2), ((s3,), e3),
+    ] + edge_cases
     desc = f"""Given a string `s`, return the index of the first character that does
 not repeat anywhere else in the string. If no such character exists, return -1.
 
@@ -405,6 +529,54 @@ Output: {e1}
                     solution=solution_code)
 
 
+def gen_reverse_words(difficulty):
+    def solve(s):
+        return " ".join(reversed(s.split()))
+
+    words_pool = ["the", "quick", "brown", "fox", "jumps", "over", "lazy",
+                  "dog", "code", "python", "array", "stack", "queue", "tree"]
+
+    def make_case():
+        k = size_for_difficulty(difficulty, (2, 4), (4, 7), (7, 10))
+        return " ".join(random.choice(words_pool) for _ in range(k))
+
+    s1 = make_case()
+    e1 = solve(s1)
+    s2 = make_case()
+    e2 = solve(s2)
+    s3 = make_case()
+    e3 = solve(s3)
+
+    # Edge cases: single word, extra surrounding/inner whitespace
+    edge_single = "hello"
+    edge_extra_spaces = "  a   bee   sea  "
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_extra_spaces,), solve(edge_extra_spaces)),
+    ]
+    test_cases = [
+        ((s1,), e1), ((s2,), e2), ((s3,), e3),
+    ] + edge_cases
+    desc = f"""Given a string `s` containing words separated by spaces, return a new
+string with the words in reverse order, separated by a single space (with
+no leading, trailing, or extra internal spaces).
+
+Example:
+Input: s = "{s1}"
+Output: "{e1}"
+"""
+    starter = "def reverse_words(s):\n    # Your code here\n    pass\n"
+    hint = ("`str.split()` with no arguments already collapses runs of "
+            "whitespace and drops leading/trailing spaces for you.")
+    solution_code = (
+        "def reverse_words(s):\n"
+        "    return ' '.join(reversed(s.split()))\n"
+    )
+    return Problem("Reverse Words in a String", "Strings", difficulty, desc,
+                    "reverse_words", starter, test_cases, hint=hint,
+                    solution=solution_code)
+
+
 # ---- Hash Table --------------------------------------------------------------
 
 
@@ -421,7 +593,19 @@ def gen_majority_element(difficulty):
 
     nums1, e1 = make_case()
     nums2, e2 = make_case()
-    test_cases = [((nums1,), e1), ((nums2,), e2)]
+    nums3, e3 = make_case()
+
+    # Edge cases: single-element array, and an array where every element is
+    # identical (trivially the majority)
+    edge_single = [7]
+    edge_all_same = [3, 3, 3, 3]
+    edge_cases = [
+        ((edge_single,), 7),
+        ((edge_all_same,), 3),
+    ]
+    test_cases = [
+        ((nums1,), e1), ((nums2,), e2), ((nums3,), e3),
+    ] + edge_cases
     desc = f"""Given an array `nums` of size n, return the majority element — the
 element that appears more than n // 2 times. You may assume the array always
 has a majority element.
@@ -468,7 +652,22 @@ def gen_group_anagrams_count(difficulty):
     e1 = solve(w1)
     w2 = make_case()
     e2 = solve(w2)
-    test_cases = [((w1,), e1), ((w2,), e2)]
+    w3 = make_case()
+    e3 = solve(w3)
+
+    # Edge cases: single word, all words identical (1 group), all words
+    # distinct with no anagram overlap
+    edge_single = ["cat"]
+    edge_all_same = ["eat", "eat", "eat"]
+    edge_all_distinct = ["dog", "star", "listen"]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_all_same,), solve(edge_all_same)),
+        ((edge_all_distinct,), solve(edge_all_distinct)),
+    ]
+    test_cases = [
+        ((w1,), e1), ((w2,), e2), ((w3,), e3),
+    ] + edge_cases
     desc = f"""Given a list of strings `words`, group the anagrams together and
 return the number of distinct anagram groups.
 
@@ -492,6 +691,52 @@ Output: {e1}
                     hint=hint, solution=solution_code)
 
 
+def gen_intersection_count(difficulty):
+    def solve(a, b):
+        return len(set(a) & set(b))
+
+    def make_case():
+        n = size_for_difficulty(difficulty, (4, 6), (6, 10), (10, 16))
+        a = [random.randint(1, 15) for _ in range(n)]
+        b = [random.randint(1, 15) for _ in range(n)]
+        return a, b
+
+    a1, b1 = make_case()
+    e1 = solve(a1, b1)
+    a2, b2 = make_case()
+    e2 = solve(a2, b2)
+    a3, b3 = make_case()
+    e3 = solve(a3, b3)
+
+    # Edge cases: no overlap at all, and identical arrays (full overlap)
+    edge_none_a, edge_none_b = [1, 2, 3], [4, 5, 6]
+    edge_same = [7, 8, 9]
+    edge_cases = [
+        ((edge_none_a, edge_none_b), solve(edge_none_a, edge_none_b)),
+        ((edge_same, edge_same), solve(edge_same, edge_same)),
+    ]
+    test_cases = [
+        ((a1, b1), e1), ((a2, b2), e2), ((a3, b3), e3),
+    ] + edge_cases
+    desc = f"""Given two integer arrays `a` and `b`, return the number of distinct
+values that appear in both arrays.
+
+Example:
+Input: a = {a1}, b = {b1}
+Output: {e1}
+"""
+    starter = "def intersection_count(a, b):\n    # Your code here\n    pass\n"
+    hint = ("Turn both arrays into sets, then use the `&` operator to get "
+            "their intersection, and take its length.")
+    solution_code = (
+        "def intersection_count(a, b):\n"
+        "    return len(set(a) & set(b))\n"
+    )
+    return Problem("Intersection of Two Arrays", "Hash Table", difficulty,
+                    desc, "intersection_count", starter, test_cases,
+                    hint=hint, solution=solution_code)
+
+
 # ---- Linked List ---------------------------------------------------------
 
 
@@ -502,7 +747,18 @@ def gen_reverse_list(difficulty):
 
     v1 = make_case()
     v2 = make_case()
-    test_cases = [((v1,), v1[::-1]), ((v2,), v2[::-1])]
+    v3 = make_case()
+
+    # Edge cases: single-node list and two-node list
+    edge_single = [random.randint(-20, 20)]
+    edge_two = [random.randint(-20, 20), random.randint(-20, 20)]
+    edge_cases = [
+        ((edge_single,), edge_single[::-1]),
+        ((edge_two,), edge_two[::-1]),
+    ]
+    test_cases = [
+        ((v1,), v1[::-1]), ((v2,), v2[::-1]), ((v3,), v3[::-1]),
+    ] + edge_cases
     desc = f"""You are given the head of a singly linked list. Reverse the list and
 return the head of the reversed list.
 
@@ -561,7 +817,22 @@ def gen_middle_node(difficulty):
     e1 = solve(v1)
     v2 = make_case()
     e2 = solve(v2)
-    test_cases = [((v1,), e1), ((v2,), e2)]
+    v3 = make_case()
+    e3 = solve(v3)
+
+    # Edge cases: single-node list, two-node list (tests the "second middle"
+    # tie-breaking rule), and three-node list
+    edge_single = [9]
+    edge_two = [1, 2]
+    edge_three = [1, 2, 3]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_two,), solve(edge_two)),
+        ((edge_three,), solve(edge_three)),
+    ]
+    test_cases = [
+        ((v1,), e1), ((v2,), e2), ((v3,), e3),
+    ] + edge_cases
     desc = f"""You are given the head of a singly linked list. Return the *value* of
 the middle node. If there are two middle nodes, return the value of the
 second middle node.
@@ -593,6 +864,69 @@ Output: {e1}
     )
 
 
+def gen_has_cycle(difficulty):
+    def make_case():
+        n = size_for_difficulty(difficulty, (3, 5), (5, 9), (9, 14))
+        values = [random.randint(-20, 20) for _ in range(n)]
+        has_cycle = random.random() < 0.5
+        pos = random.randint(0, n - 1) if has_cycle else -1
+        return values, pos
+
+    values1, pos1 = make_case()
+    e1 = pos1 >= 0
+    values2, pos2 = make_case()
+    e2 = pos2 >= 0
+    values3, pos3 = make_case()
+    e3 = pos3 >= 0
+
+    # Edge cases: single node with no cycle, single node that cycles to
+    # itself, and a list whose cycle starts at the head (not the tail)
+    edge_single_no_cycle = ([5], -1)
+    edge_single_self_cycle = ([5], 0)
+    edge_cycle_at_head = ([1, 2, 3, 4], 0)
+    edge_cases = [
+        (edge_single_no_cycle, edge_single_no_cycle[1] >= 0),
+        (edge_single_self_cycle, edge_single_self_cycle[1] >= 0),
+        (edge_cycle_at_head, edge_cycle_at_head[1] >= 0),
+    ]
+    test_cases = [
+        ((values1, pos1), e1), ((values2, pos2), e2), ((values3, pos3), e3),
+    ] + edge_cases
+    desc = """You are given the head of a singly linked list, which may or may not
+contain a cycle (a node whose `next` eventually loops back to an earlier
+node). Return True if the list has a cycle, False otherwise.
+
+Your solution should use O(1) extra space (Floyd's cycle detection /
+"tortoise and hare" is the classic approach).
+"""
+    starter = (
+        "# ListNode is already defined for you.\n\n"
+        "def has_cycle(head):\n"
+        "    # Your code here\n"
+        "    pass\n"
+    )
+    hint = ("Move a `slow` pointer one step and a `fast` pointer two steps "
+            "at a time. If they ever meet, there's a cycle; if `fast` "
+            "reaches the end, there isn't.")
+    solution_code = (
+        "def has_cycle(head):\n"
+        "    slow = fast = head\n"
+        "    while fast and fast.next:\n"
+        "        slow = slow.next\n"
+        "        fast = fast.next.next\n"
+        "        if slow is fast:\n"
+        "            return True\n"
+        "    return False\n"
+    )
+    return Problem(
+        "Linked List Cycle", "Linked List", difficulty, desc, "has_cycle",
+        starter, test_cases, hint=hint, solution=solution_code,
+        input_transform=lambda args: (
+            build_linked_list_with_cycle(args[0], args[1]),
+        ),
+    )
+
+
 # ---- Trees -----------------------------------------------------------------
 
 
@@ -619,7 +953,19 @@ def gen_tree_max_depth(difficulty):
     e1 = solve(v1)
     v2 = _random_tree_values(difficulty)
     e2 = solve(v2)
-    test_cases = [((v1,), e1), ((v2,), e2)]
+    v3 = _random_tree_values(difficulty)
+    e3 = solve(v3)
+
+    # Edge cases: single-node tree, and a fully left-skewed chain
+    edge_single = [5]
+    edge_chain = [1, 2, None, 3, None, 4, None]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_chain,), solve(edge_chain)),
+    ]
+    test_cases = [
+        ((v1,), e1), ((v2,), e2), ((v3,), e3),
+    ] + edge_cases
     desc = f"""You are given the root of a binary tree, provided as a level-order
 list (None marks a missing child). Return its maximum depth — the number of
 nodes along the longest path from the root down to the farthest leaf.
@@ -669,7 +1015,22 @@ def gen_tree_sum(difficulty):
     e1 = solve(v1)
     v2 = _random_tree_values(difficulty)
     e2 = solve(v2)
-    test_cases = [((v1,), e1), ((v2,), e2)]
+    v3 = _random_tree_values(difficulty)
+    e3 = solve(v3)
+
+    # Edge cases: single-node tree, tree containing all zeros, and a tree
+    # containing negative values that should reduce the sum
+    edge_single = [8]
+    edge_zeros = [0, 0, 0, None, 0]
+    edge_negative = [5, -3, -8, None, 2]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_zeros,), solve(edge_zeros)),
+        ((edge_negative,), solve(edge_negative)),
+    ]
+    test_cases = [
+        ((v1,), e1), ((v2,), e2), ((v3,), e3),
+    ] + edge_cases
     desc = f"""You are given the root of a binary tree, provided as a level-order
 list (None marks a missing child). Return the sum of the values of every
 node in the tree.
@@ -698,6 +1059,68 @@ Output: {e1}
     )
 
 
+def gen_tree_count_leaves(difficulty):
+    def solve(values):
+        root = build_tree(values)
+
+        def count(node):
+            if node is None:
+                return 0
+            if node.left is None and node.right is None:
+                return 1
+            return count(node.left) + count(node.right)
+
+        return count(root)
+
+    v1 = _random_tree_values(difficulty)
+    e1 = solve(v1)
+    v2 = _random_tree_values(difficulty)
+    e2 = solve(v2)
+    v3 = _random_tree_values(difficulty)
+    e3 = solve(v3)
+
+    # Edge cases: single-node tree (the root itself is a leaf), and a
+    # left-skewed chain (exactly one leaf)
+    edge_single = [4]
+    edge_chain = [1, 2, None, 3, None]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_chain,), solve(edge_chain)),
+    ]
+    test_cases = [
+        ((v1,), e1), ((v2,), e2), ((v3,), e3),
+    ] + edge_cases
+    desc = f"""You are given the root of a binary tree, provided as a level-order
+list (None marks a missing child). Return the number of leaf nodes (nodes
+with no children).
+
+Example:
+Input (level-order): {v1}
+Output: {e1}
+"""
+    starter = (
+        "# TreeNode is already defined for you.\n\n"
+        "def count_leaves(root):\n"
+        "    # Your code here\n"
+        "    pass\n"
+    )
+    hint = ("A node is a leaf when both its `left` and `right` children are "
+            "None. Recurse and add up leaf counts from both subtrees.")
+    solution_code = (
+        "def count_leaves(root):\n"
+        "    if root is None:\n"
+        "        return 0\n"
+        "    if root.left is None and root.right is None:\n"
+        "        return 1\n"
+        "    return count_leaves(root.left) + count_leaves(root.right)\n"
+    )
+    return Problem(
+        "Count Leaf Nodes", "Trees", difficulty, desc, "count_leaves",
+        starter, test_cases, hint=hint, solution=solution_code,
+        input_transform=lambda args: (build_tree(args[0]),),
+    )
+
+
 # ---- Recursion --------------------------------------------------------------
 
 
@@ -705,7 +1128,19 @@ def gen_factorial(difficulty):
     rng = {"Easy": (3, 6), "Medium": (6, 10), "Hard": (10, 15)}[difficulty]
     n1 = random.randint(*rng)
     n2 = random.randint(*rng)
-    test_cases = [((n1,), math.factorial(n1)), ((n2,), math.factorial(n2))]
+    n3 = random.randint(*rng)
+
+    # Edge cases: 0! and 1! (both equal 1, easy to get wrong with an off-by-one
+    # base case)
+    edge_cases = [
+        ((0,), math.factorial(0)),
+        ((1,), math.factorial(1)),
+    ]
+    test_cases = [
+        ((n1,), math.factorial(n1)),
+        ((n2,), math.factorial(n2)),
+        ((n3,), math.factorial(n3)),
+    ] + edge_cases
     desc = f"""Write a recursive function that computes the factorial of a
 non-negative integer `n` (n!). Recall that 0! = 1.
 
@@ -737,7 +1172,16 @@ def gen_fibonacci(difficulty):
 
     n1 = random.randint(*rng)
     n2 = random.randint(*rng)
-    test_cases = [((n1,), fib(n1)), ((n2,), fib(n2))]
+    n3 = random.randint(*rng)
+
+    # Edge cases: fib(0) and fib(1), the two base cases
+    edge_cases = [
+        ((0,), fib(0)),
+        ((1,), fib(1)),
+    ]
+    test_cases = [
+        ((n1,), fib(n1)), ((n2,), fib(n2)), ((n3,), fib(n3)),
+    ] + edge_cases
     desc = f"""Return the n-th Fibonacci number (0-indexed, with fib(0) = 0 and
 fib(1) = 1).
 
@@ -760,6 +1204,49 @@ Output: {fib(n1)}
                     solution=solution_code)
 
 
+def gen_sum_digits(difficulty):
+    rng = {"Easy": (10, 999), "Medium": (1000, 99999),
+           "Hard": (100000, 9999999)}[difficulty]
+
+    def solve(n):
+        if n < 10:
+            return n
+        return n % 10 + solve(n // 10)
+
+    n1 = random.randint(*rng)
+    n2 = random.randint(*rng)
+    n3 = random.randint(*rng)
+
+    # Edge cases: single-digit number (base case) and zero
+    edge_cases = [
+        ((0,), solve(0)),
+        ((7,), solve(7)),
+    ]
+    test_cases = [
+        ((n1,), solve(n1)), ((n2,), solve(n2)), ((n3,), solve(n3)),
+    ] + edge_cases
+    desc = f"""Write a recursive function that computes the sum of the digits of a
+non-negative integer `n`.
+
+Example:
+Input: n = {n1}
+Output: {solve(n1)}
+"""
+    starter = "def sum_digits(n):\n    # Your code here (make it recursive!)\n    pass\n"
+    hint = ("Base case: a single-digit number is its own digit sum. "
+            "Otherwise, peel off the last digit with `n % 10` and recurse "
+            "on `n // 10`.")
+    solution_code = (
+        "def sum_digits(n):\n"
+        "    if n < 10:\n"
+        "        return n\n"
+        "    return n % 10 + sum_digits(n // 10)\n"
+    )
+    return Problem("Sum of Digits (Recursive)", "Recursion", difficulty,
+                    desc, "sum_digits", starter, test_cases, hint=hint,
+                    solution=solution_code)
+
+
 # ---- Dynamic Programming ------------------------------------------------
 
 
@@ -776,7 +1263,16 @@ def gen_climb_stairs(difficulty):
 
     n1 = random.randint(*rng)
     n2 = random.randint(*rng)
-    test_cases = [((n1,), solve(n1)), ((n2,), solve(n2))]
+    n3 = random.randint(*rng)
+
+    # Edge cases: n=1 and n=2, the two base cases of the recurrence
+    edge_cases = [
+        ((1,), solve(1)),
+        ((2,), solve(2)),
+    ]
+    test_cases = [
+        ((n1,), solve(n1)), ((n2,), solve(n2)), ((n3,), solve(n3)),
+    ] + edge_cases
     desc = f"""You are climbing a staircase with `n` steps. Each time you can climb
 either 1 or 2 steps. Return the number of distinct ways you can climb to
 the top.
@@ -816,7 +1312,21 @@ def gen_house_robber(difficulty):
     e1 = solve(nums1)
     nums2 = make_case()
     e2 = solve(nums2)
-    test_cases = [((nums1,), e1), ((nums2,), e2)]
+    nums3 = make_case()
+    e3 = solve(nums3)
+
+    # Edge cases: single house, two houses (can only take one), all zeros
+    edge_single = [12]
+    edge_two = [5, 9]
+    edge_zeros = [0, 0, 0, 0]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_two,), solve(edge_two)),
+        ((edge_zeros,), solve(edge_zeros)),
+    ]
+    test_cases = [
+        ((nums1,), e1), ((nums2,), e2), ((nums3,), e3),
+    ] + edge_cases
     desc = f"""You are a robber planning to rob houses along a street. `nums[i]` is
 the amount of money in house i. You cannot rob two adjacent houses (it
 triggers an alarm). Return the maximum amount of money you can rob.
@@ -864,7 +1374,22 @@ def gen_binary_search(difficulty):
     e1 = solve(nums1, t1)
     nums2, t2 = make_case()
     e2 = solve(nums2, t2)
-    test_cases = [((nums1, t1), e1), ((nums2, t2), e2)]
+    nums3, t3 = make_case()
+    e3 = solve(nums3, t3)
+
+    # Edge cases: single-element array (found and not found), target at the
+    # very first/last index
+    edge_single = [7]
+    edge_bounds = [1, 4, 9, 15, 22]
+    edge_cases = [
+        ((edge_single, 7), solve(edge_single, 7)),
+        ((edge_single, 3), solve(edge_single, 3)),
+        ((edge_bounds, 1), solve(edge_bounds, 1)),
+        ((edge_bounds, 22), solve(edge_bounds, 22)),
+    ]
+    test_cases = [
+        ((nums1, t1), e1), ((nums2, t2), e2), ((nums3, t3), e3),
+    ] + edge_cases
     desc = f"""Given a sorted array of distinct integers `nums` and an integer
 `target`, return the index of `target` if it exists, or -1 otherwise. Your
 solution should run in O(log n) time.
@@ -908,7 +1433,20 @@ def gen_kth_largest(difficulty):
     e1 = solve(nums1, k1)
     nums2, k2 = make_case()
     e2 = solve(nums2, k2)
-    test_cases = [((nums1, k1), e1), ((nums2, k2), e2)]
+    nums3, k3 = make_case()
+    e3 = solve(nums3, k3)
+
+    # Edge cases: k=1 (the maximum), k=n (the minimum), and an array with
+    # duplicate values
+    edge_nums = [4, 4, 8, 8, 2, 9]
+    edge_cases = [
+        ((edge_nums, 1), solve(edge_nums, 1)),
+        ((edge_nums, len(edge_nums)), solve(edge_nums, len(edge_nums))),
+        ((edge_nums, 3), solve(edge_nums, 3)),
+    ]
+    test_cases = [
+        ((nums1, k1), e1), ((nums2, k2), e2), ((nums3, k3), e3),
+    ] + edge_cases
     desc = f"""Given an integer array `nums` and an integer `k`, return the k-th
 largest element in the array (the k-th largest *value*, counting
 duplicates separately — not the k-th distinct value).
@@ -945,7 +1483,19 @@ def gen_is_prime(difficulty):
 
     n1 = random.randint(2, hi)
     n2 = random.randint(2, hi)
-    test_cases = [((n1,), solve(n1)), ((n2,), solve(n2))]
+    n3 = random.randint(2, hi)
+
+    # Edge cases: 0 and 1 (not prime by definition), 2 (smallest prime),
+    # and 4 (smallest composite)
+    edge_cases = [
+        ((0,), solve(0)),
+        ((1,), solve(1)),
+        ((2,), solve(2)),
+        ((4,), solve(4)),
+    ]
+    test_cases = [
+        ((n1,), solve(n1)), ((n2,), solve(n2)), ((n3,), solve(n3)),
+    ] + edge_cases
     desc = f"""Write a function that determines whether a given integer `n` is a
 prime number. Return True or False.
 
@@ -972,7 +1522,19 @@ def gen_gcd(difficulty):
     hi = {"Easy": 50, "Medium": 500, "Hard": 5000}[difficulty]
     a1, b1 = random.randint(1, hi), random.randint(1, hi)
     a2, b2 = random.randint(1, hi), random.randint(1, hi)
-    test_cases = [((a1, b1), math.gcd(a1, b1)), ((a2, b2), math.gcd(a2, b2))]
+    a3, b3 = random.randint(1, hi), random.randint(1, hi)
+
+    # Edge cases: equal numbers, a divides b exactly, and gcd with 1
+    edge_cases = [
+        ((6, 6), math.gcd(6, 6)),
+        ((4, 12), math.gcd(4, 12)),
+        ((1, 17), math.gcd(1, 17)),
+    ]
+    test_cases = [
+        ((a1, b1), math.gcd(a1, b1)),
+        ((a2, b2), math.gcd(a2, b2)),
+        ((a3, b3), math.gcd(a3, b3)),
+    ] + edge_cases
     desc = f"""Write a function that computes the greatest common divisor (GCD) of
 two positive integers `a` and `b`.
 
@@ -1022,7 +1584,22 @@ def gen_valid_parentheses(difficulty):
     e1 = solve(s1)
     s2 = make_case()
     e2 = solve(s2)
-    test_cases = [((s1,), e1), ((s2,), e2)]
+    s3 = make_case()
+    e3 = solve(s3)
+
+    # Edge cases: empty string (vacuously valid), single unmatched bracket,
+    # and mismatched-type nesting like "(]"
+    edge_empty = ""
+    edge_single = "("
+    edge_mismatched = "([)]"
+    edge_cases = [
+        ((edge_empty,), solve(edge_empty)),
+        ((edge_single,), solve(edge_single)),
+        ((edge_mismatched,), solve(edge_mismatched)),
+    ]
+    test_cases = [
+        ((s1,), e1), ((s2,), e2), ((s3,), e3),
+    ] + edge_cases
     desc = f"""Given a string `s` containing only the characters '(', ')', '{{',
 '}}', '[' and ']', determine whether the string is valid — every opening
 bracket must be closed by the matching type, in the correct order.
@@ -1069,7 +1646,22 @@ def gen_next_greater_element(difficulty):
     e1 = solve(nums1)
     nums2 = make_case()
     e2 = solve(nums2)
-    test_cases = [((nums1,), e1), ((nums2,), e2)]
+    nums3 = make_case()
+    e3 = solve(nums3)
+
+    # Edge cases: single element (always -1), strictly decreasing sequence
+    # (always -1), and strictly increasing sequence
+    edge_single = [random.randint(1, 30)]
+    edge_decreasing = [9, 7, 5, 3, 1]
+    edge_increasing = [1, 3, 5, 7, 9]
+    edge_cases = [
+        ((edge_single,), solve(edge_single)),
+        ((edge_decreasing,), solve(edge_decreasing)),
+        ((edge_increasing,), solve(edge_increasing)),
+    ]
+    test_cases = [
+        ((nums1,), e1), ((nums2,), e2), ((nums3,), e3),
+    ] + edge_cases
     desc = f"""Given an array of integers `nums`, for each element find the next
 greater element to its right (the first element that is larger). If none
 exists, use -1. Return the results as a list, one per input element.
