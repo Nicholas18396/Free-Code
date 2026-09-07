@@ -1688,21 +1688,247 @@ Output: {e1}
                     solution=solution_code)
 
 
+def gen_unique_paths(difficulty):
+    def solve(m, n):
+        dp = [[1] * n for _ in range(m)]
+        for i in range(1, m):
+            for j in range(1, n):
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1]
+        return dp[m - 1][n - 1]
+
+    def make_case():
+        lo, hi = {"Easy": (2, 4), "Medium": (4, 7), "Hard": (7, 12)}[difficulty]
+        return random.randint(lo, hi), random.randint(lo, hi)
+
+    m1, n1 = make_case()
+    e1 = solve(m1, n1)
+    m2, n2 = make_case()
+    e2 = solve(m2, n2)
+    m3, n3 = make_case()
+    e3 = solve(m3, n3)
+
+    # Edge cases: a single row, a single column, and a small square grid
+    edge_cases = [
+        ((1, 5), solve(1, 5)),
+        ((5, 1), solve(5, 1)),
+        ((2, 2), solve(2, 2)),
+    ]
+    test_cases = [
+        ((m1, n1), e1), ((m2, n2), e2), ((m3, n3), e3),
+    ] + edge_cases
+    desc = f"""A robot sits at the top-left corner of an `m x n` grid. It can only
+move right or down. Return the number of distinct paths to the
+bottom-right corner.
+
+Example:
+Input: m = {m1}, n = {n1}
+Output: {e1}
+"""
+    starter = "def unique_paths(m, n):\n    # Your code here\n    pass\n"
+    hint = ("Build a 2D table where dp[i][j] is the number of ways to reach "
+            "cell (i, j) — it's just the sum of the cell above and the cell "
+            "to the left.")
+    solution_code = (
+        "def unique_paths(m, n):\n"
+        "    dp = [[1] * n for _ in range(m)]\n"
+        "    for i in range(1, m):\n"
+        "        for j in range(1, n):\n"
+        "            dp[i][j] = dp[i - 1][j] + dp[i][j - 1]\n"
+        "    return dp[m - 1][n - 1]\n"
+    )
+    return Problem("Unique Paths", "Dynamic Programming", difficulty, desc,
+                    "unique_paths", starter, test_cases, hint=hint,
+                    solution=solution_code)
+
+
+# ---- Sorting & Searching (extra) -------------------------------------------
+
+
+def gen_merge_sorted(difficulty):
+    def solve(a, b):
+        return sorted(a + b)
+
+    def make_case():
+        n = size_for_difficulty(difficulty, (3, 5), (5, 9), (9, 14))
+        m = size_for_difficulty(difficulty, (3, 5), (5, 9), (9, 14))
+        a = sorted(random.randint(-30, 30) for _ in range(n))
+        b = sorted(random.randint(-30, 30) for _ in range(m))
+        return a, b
+
+    a1, b1 = make_case()
+    e1 = solve(a1, b1)
+    a2, b2 = make_case()
+    e2 = solve(a2, b2)
+    a3, b3 = make_case()
+    e3 = solve(a3, b3)
+
+    # Edge cases: one array empty, both single-element, and overlapping
+    # duplicate values
+    edge_cases = [
+        (([], [3, 5, 9]), solve([], [3, 5, 9])),
+        (([4], [2]), solve([4], [2])),
+        (([1, 3, 3, 5], [2, 3, 3]), solve([1, 3, 3, 5], [2, 3, 3])),
+    ]
+    test_cases = [
+        ((a1, b1), e1), ((a2, b2), e2), ((a3, b3), e3),
+    ] + edge_cases
+    desc = f"""Given two arrays `a` and `b`, each already sorted in ascending
+order, merge them into a single sorted array and return it.
+
+Example:
+Input: a = {a1}, b = {b1}
+Output: {e1}
+"""
+    starter = "def merge_sorted(a, b):\n    # Your code here\n    pass\n"
+    hint = ("Walk both arrays with two pointers, always taking the smaller "
+            "of the two current elements next.")
+    solution_code = (
+        "def merge_sorted(a, b):\n"
+        "    i = j = 0\n"
+        "    result = []\n"
+        "    while i < len(a) and j < len(b):\n"
+        "        if a[i] <= b[j]:\n"
+        "            result.append(a[i]); i += 1\n"
+        "        else:\n"
+        "            result.append(b[j]); j += 1\n"
+        "    result.extend(a[i:])\n"
+        "    result.extend(b[j:])\n"
+        "    return result\n"
+    )
+    return Problem("Merge Sorted Arrays", "Sorting & Searching", difficulty,
+                    desc, "merge_sorted", starter, test_cases, hint=hint,
+                    solution=solution_code)
+
+
+# ---- Math (extra) -----------------------------------------------------------
+
+
+def gen_is_power_of_two(difficulty):
+    hi_exp = {"Easy": 10, "Medium": 20, "Hard": 30}[difficulty]
+
+    def solve(n):
+        return n > 0 and (n & (n - 1)) == 0
+
+    def make_case():
+        if random.random() < 0.5:
+            return 2 ** random.randint(0, hi_exp)
+        return random.randint(1, 2 ** hi_exp)
+
+    n1 = make_case()
+    e1 = solve(n1)
+    n2 = make_case()
+    e2 = solve(n2)
+    n3 = make_case()
+    e3 = solve(n3)
+
+    # Edge cases: 0 (not a power of two), 1 (= 2^0), and a negative number
+    edge_cases = [
+        ((0,), solve(0)),
+        ((1,), solve(1)),
+        ((-8,), solve(-8)),
+    ]
+    test_cases = [
+        ((n1,), e1), ((n2,), e2), ((n3,), e3),
+    ] + edge_cases
+    desc = f"""Write a function that determines whether a given integer `n` is a
+power of two (1, 2, 4, 8, 16, ...). Return True or False.
+
+Example:
+Input: n = {n1}
+Output: {e1}
+"""
+    starter = "def is_power_of_two(n):\n    # Your code here\n    pass\n"
+    hint = ("A power of two has exactly one bit set. n & (n - 1) clears the "
+            "lowest set bit, so the result is zero only for powers of two "
+            "(and n must be positive).")
+    solution_code = (
+        "def is_power_of_two(n):\n"
+        "    return n > 0 and (n & (n - 1)) == 0\n"
+    )
+    return Problem("Power of Two", "Math", difficulty, desc,
+                    "is_power_of_two", starter, test_cases, hint=hint,
+                    solution=solution_code)
+
+
+# ---- Stack & Queue (extra) --------------------------------------------------
+
+
+def gen_remove_adjacent_duplicates(difficulty):
+    def solve(s):
+        stack = []
+        for c in s:
+            if stack and stack[-1] == c:
+                stack.pop()
+            else:
+                stack.append(c)
+        return "".join(stack)
+
+    letters = "abc"
+
+    def make_case():
+        n = size_for_difficulty(difficulty, (4, 7), (7, 12), (12, 18))
+        return "".join(random.choice(letters) for _ in range(n))
+
+    s1 = make_case()
+    e1 = solve(s1)
+    s2 = make_case()
+    e2 = solve(s2)
+    s3 = make_case()
+    e3 = solve(s3)
+
+    # Edge cases: no duplicates at all, everything cancels out, single char
+    edge_no_dup = "abcabc"
+    edge_all_cancel = "abba"
+    edge_single = "z"
+    edge_cases = [
+        ((edge_no_dup,), solve(edge_no_dup)),
+        ((edge_all_cancel,), solve(edge_all_cancel)),
+        ((edge_single,), solve(edge_single)),
+    ]
+    test_cases = [
+        ((s1,), e1), ((s2,), e2), ((s3,), e3),
+    ] + edge_cases
+    desc = f"""Given a string `s`, repeatedly remove adjacent pairs of identical
+characters until no more pairs remain, and return the resulting string.
+
+Example:
+Input: s = "{s1}"
+Output: "{e1}"
+"""
+    starter = ("def remove_adjacent_duplicates(s):\n"
+               "    # Your code here\n    pass\n")
+    hint = ("Use a stack: push each character, but if it matches the top of "
+            "the stack, pop instead — that cancels the pair.")
+    solution_code = (
+        "def remove_adjacent_duplicates(s):\n"
+        "    stack = []\n"
+        "    for c in s:\n"
+        "        if stack and stack[-1] == c:\n"
+        "            stack.pop()\n"
+        "        else:\n"
+        "            stack.append(c)\n"
+        "    return ''.join(stack)\n"
+    )
+    return Problem("Remove Adjacent Duplicates", "Stack & Queue", difficulty,
+                    desc, "remove_adjacent_duplicates", starter, test_cases,
+                    hint=hint, solution=solution_code)
+
+
 # ---------------------------------------------------------------------------
 # Topic registry + generation dispatch
 # ---------------------------------------------------------------------------
 
 TOPICS = {
-    "Arrays": [gen_two_sum, gen_max_subarray],
-    "Strings": [gen_valid_palindrome, gen_first_unique_char],
-    "Hash Table": [gen_majority_element, gen_group_anagrams_count],
-    "Linked List": [gen_reverse_list, gen_middle_node],
-    "Trees": [gen_tree_max_depth, gen_tree_sum],
-    "Recursion": [gen_factorial, gen_fibonacci],
-    "Dynamic Programming": [gen_climb_stairs, gen_house_robber],
-    "Sorting & Searching": [gen_binary_search, gen_kth_largest],
-    "Math": [gen_is_prime, gen_gcd],
-    "Stack & Queue": [gen_valid_parentheses, gen_next_greater_element],
+    "Arrays": [gen_two_sum, gen_max_subarray, gen_contains_duplicate],
+    "Strings": [gen_valid_palindrome, gen_first_unique_char, gen_reverse_words],
+    "Hash Table": [gen_majority_element, gen_group_anagrams_count, gen_intersection_count],
+    "Linked List": [gen_reverse_list, gen_middle_node, gen_has_cycle],
+    "Trees": [gen_tree_max_depth, gen_tree_sum, gen_tree_count_leaves],
+    "Recursion": [gen_factorial, gen_fibonacci, gen_sum_digits],
+    "Dynamic Programming": [gen_climb_stairs, gen_house_robber, gen_unique_paths],
+    "Sorting & Searching": [gen_binary_search, gen_kth_largest, gen_merge_sorted],
+    "Math": [gen_is_prime, gen_gcd, gen_is_power_of_two],
+    "Stack & Queue": [gen_valid_parentheses, gen_next_greater_element, gen_remove_adjacent_duplicates],
 }
 
 DIFFICULTIES = ["Easy", "Medium", "Hard"]
